@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Video Creator</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#11111a">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <main class="canvas-container">
+            <canvas id="patternCanvas" width="1920" height="1080"></canvas>
+
+            <div id="recordingIndicator" class="recording-badge hidden">
+                <div class="red-dot"></div>
+                Recording...
+            </div>
+        </main>
+
+        <aside class="controls-panel">
+            <header>
+                <h1>Pattern Maker</h1>
+                <p class="subtitle">Generate & capture repeating visual patterns in high quality video formats.</p>
+            </header>
+
+            <div class="controls-scroll">
+                <div class="control-group">
+                    <label for="categorySelect">Category Type</label>
+                    <div class="select-wrapper">
+                        <select id="categorySelect">
+                            <!-- Populated with categories via script.js -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="patternSelect">Specific Pattern</label>
+                    <div class="select-wrapper">
+                        <select id="patternSelect">
+                            <!-- Populated dynamically via script.js using patterns.js registry based on Category -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="secondaryPatternSelect">Secondary Overlay Pattern</label>
+                    <div class="select-wrapper">
+                        <select id="secondaryPatternSelect">
+                            <option value="none">None (Single Pattern)</option>
+                            <!-- Populated dynamically via script.js with all patterns -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group" style="padding-bottom: 10px;">
+                    <label for="customBgUpload">Custom Background Media</label>
+                    <input type="file" id="customBgUpload" accept="image/*,video/*"
+                        style="width: 100%; margin-top: 8px; color: #aaa; font-size: 0.9em;">
+                </div>
+
+                <div class="control-group">
+                    <label for="audioTrack">Audio Soundscape</label>
+                    <div class="select-wrapper">
+                        <select id="audioTrack">
+                            <option value="drone">Deep Ambient Drone (Adaptive)</option>
+                            <option value="binaural">Deep Sleep (Binaural Delta Waves)</option>
+                            <option value="youtube_sleep">YouTube Deep Sleep (Warm Healing Pads)</option>
+                            <option value="brown">ASMR (Soothing Brown Noise)</option>
+                            <option value="cosmos">Cosmic Sleep (Ethereal Pads)</option>
+                            <option value="none">No Audio (Muted)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="aspectRatio">Base Video Aspect Ratio</label>
+                    <div class="select-wrapper">
+                        <select id="aspectRatio">
+                            <option value="16:9|1920|1080">16:9 Landscape (1920x1080)</option>
+                            <option value="9:16|1080|1920">9:16 Portrait (1080x1920) - Mobile</option>
+                            <option value="1:1|1080|1080">1:1 Square (1080x1080) - Insta</option>
+                            <option value="4:3|1440|1080">4:3 Standard (1440x1080)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="resolutionScale">Export Resolution Quality</label>
+                    <div class="select-wrapper">
+                        <select id="resolutionScale">
+                            <option value="0.5">Half (Fast rendering)</option>
+                            <option value="1.0" selected>Standard (1080p equivalent)</option>
+                            <option value="1.5">High (1440p equivalent)</option>
+                            <option value="2.0">Ultra (4k equivalent)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="frameRate">Video Frame Rate</label>
+                    <div class="select-wrapper">
+                        <select id="frameRate">
+                            <option value="24">24 FPS (Cinematic)</option>
+                            <option value="30">30 FPS (Standard web)</option>
+                            <option value="60" selected>60 FPS (Ultra smooth)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="colorHue">Base Color Hue: <span id="hueValue">180</span>°</label>
+                    <input type="range" id="colorHue" min="0" max="360" value="180">
+                </div>
+
+                <div class="control-group">
+                    <label for="complexity">Complexity: <span id="complexityValue">50</span>%</label>
+                    <input type="range" id="complexity" min="1" max="100" value="50">
+                </div>
+
+                <div class="control-group">
+                    <label for="speed">Animation Speed: <span id="speedValue">50</span>%</label>
+                    <input type="range" id="speed" min="1" max="100" value="50">
+                </div>
+
+                <div class="control-group">
+                    <label for="duration">Rec Duration: <span id="durationValue">0</span>s (0=Manual)</label>
+                    <input type="range" id="duration" min="0" max="120" value="0" step="5">
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="recordBtn" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="3" fill="currentColor"></circle>
+                    </svg>
+                    Start Recording
+                </button>
+                <button id="stopBtn" class="btn btn-danger" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6" y="6" width="12" height="12" fill="currentColor"></rect>
+                    </svg>
+                    Stop & Save Video
+                </button>
+            </div>
+        </aside>
+    </div>
+    <script src="patterns.js"></script>
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((registration) => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, (err) => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
